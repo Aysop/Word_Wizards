@@ -10,6 +10,47 @@ public class StatManager : MonoBehaviour
     private int corr_words = 0;
     private double WPM = 0;
 
+    // returns double of user's typing accuracy
+    private double calculate_accuracy()
+    {
+        accuracy = ((total_chars - wrong_chars) / total_chars) * 100;
+        return accuracy;
+    }
+
+    // returns string with user's type accuracy
+    public string Print_Accuracy()
+    {
+        calculate_accuracy();
+        string output = Math.Round(accuracy, 2) + "%";
+        return output;
+
+    }
+
+    // returns string with user's words per minute
+    public string Print_WPM()
+    {
+        calculate_WPM();
+        string output = Math.Round(WPM, 2) + "";
+        return output;
+
+    }
+
+    // returns double of user's words per minute
+    private double calculate_WPM()
+    {
+        WPM = (corr_words * 60) / currentTime;
+        return WPM;
+    }
+
+    public void Set_Corr_Words(int x)
+    {
+        this.corr_words = x;
+    }
+
+    public int Get_Corr_Words()
+    {
+        return corr_words;
+    }
     public void Set_Total_Chars(double x)
     {
         this.total_chars = x;
@@ -29,7 +70,15 @@ public class StatManager : MonoBehaviour
     {
         return currentTime;
     }
+    public void Set_WPM(double x)
+    {
+        this.WPM = x;
+    }
 
+    public double Get_WPM()
+    {
+        return WPM;
+    }
     public void Set_Wrong_Chars(double x)
     {
         this.wrong_chars = x;
@@ -40,53 +89,8 @@ public class StatManager : MonoBehaviour
         return wrong_chars;
     }
 
-    public void Set_WPM(double x)
-    {
-        this.WPM = x;
-    }
-
-    public double Get_WPM()
-    {
-        return WPM;
-    }
-    public void Set_Corr_Words(int x)
-    {
-        this.corr_words = x;
-    }
-
-    public int Get_Corr_Words()
-    {
-        return corr_words;
-    }
 
 
-    private double calculate_avg()
-    { 
-        accuracy = ((total_chars - wrong_chars) / total_chars) * 100;
-        return accuracy;
-    }
-
-    public string Print_String()
-    {
-        calculate_avg();
-        string output = Math.Round(accuracy,2) + "%";
-        return output;
-
-    }
-
-    public string Print_WPM()
-    {
-        calculate_WPM();
-        string output = Math.Round(WPM,2) + "";
-        return output;
-
-    }
-
-    private double calculate_WPM()
-    {
-        WPM = corr_words / (currentTime / 60);
-        return WPM;
-    }
 
 
 }

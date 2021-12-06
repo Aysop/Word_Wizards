@@ -12,30 +12,37 @@ public class Wizard : WordBank
     public float moveSpeed = 75f;
     public LayerMask enemyLayers;
     public StatManager statManager;
-    private GameObject popUp;
-    private Text acc_per;
-    private Text WPM;
-    private Text title_text;
-    private Text author_text;
-    float currentTime = 0f;
 
     private int maxHealth = 0;
     private int currentHealth;
     private string remainingWord = string.Empty;
     private string currentWord = string.Empty;
+    private GameObject popUp;
+    private Text acc_per;
+    private Text WPM;
+    private Text title_text;
+    private Text author_text;
+    private float currentTime = 0f;
 
 
     // Start is called before the first frame update
     private void Start()
     {
         PopUp();
-        maxHealth = calculateHealth();
+        maxHealth = totalWords();
         SetMaxHealth(maxHealth);
-        UnityEngine.Debug.Log(currentHealth);
         if (!photonView.IsMine)
             return;
         SetCurrentWord();
 
+    }
+
+    // Update is called once per frame
+    private void Update()
+    {
+        PlayerControls();
+        currentTime += 1 * Time.deltaTime;
+        statManager.Set_Time(currentTime);
     }
 
     private void PopUp()
@@ -61,45 +68,28 @@ public class Wizard : WordBank
 
     }
 
-    private void SetHealth(int health)
-    {
-        slider.value = health;
-        currentHealth = health;
-    }
 
 
-    private int GetHealth()
-    {
-        return currentHealth;
-    }
 
-    private void SetMaxHealth(int health)
-    {
-        slider.maxValue = health;
-        slider.value = health;
-        currentHealth = health;
-    }
+
+
+
 
     private void SetCurrentWord()
     {
+        // gets new word
         currentWord = GetWord();
+        // calls RPC method to broadcast new word
         photonView.RPC("SetRemainingWord", RpcTarget.AllBuffered, currentWord);
-
     }
 
     [PunRPC]
     private void SetRemainingWord(string newString)
     {
+        // sets remaining word var to new word
         remainingWord = newString;
+        // displays new word above players head
         wordOutput.text = remainingWord;
-    }
-
-    // Update is called once per frame
-    private void Update()
-    {
-        PlayerControls();
-        currentTime += 1 * Time.deltaTime;
-        statManager.Set_Time(currentTime);
     }
 
 
@@ -153,13 +143,29 @@ public class Wizard : WordBank
         return remainingWord.Length == 0;
     }
 
-    private void CheckHealth()
+
+
+
+
+    private void SetHealth(int health)
     {
-        if (currentHealth == 0)
-        {
-            photonView.RPC("Die", RpcTarget.AllBuffered);
-        }
+        slider.value = health;
+        currentHealth = health;
     }
+
+
+    private int GetHealth()
+    {
+        return currentHealth;
+    }
+
+    private void SetMaxHealth(int health)
+    {
+        slider.maxValue = health;
+        slider.value = health;
+        currentHealth = health;
+    }
+
 
     [PunRPC]
     void Attack()
@@ -177,7 +183,6 @@ public class Wizard : WordBank
             if (pView.GetComponent<Wizard>().GetHealth() == 0)
             {
                 popUp.SetActive(true);
-                UnityEngine.Debug.Log(statManager.Print_String());
             }
         }
 
@@ -191,6 +196,14 @@ public class Wizard : WordBank
         Gizmos.DrawWireSphere(SpellPoint.position, spellRange);
     }
 
+
+    private void CheckHealth()
+    {
+        if (currentHealth == 0)
+        {
+            photonView.RPC("Die", RpcTarget.AllBuffered);
+        }
+    }
 
     private void TakeDamage()
     {
@@ -207,12 +220,16 @@ public class Wizard : WordBank
         popUp.SetActive(true);
         animator.SetTrigger("isDead");
         this.enabled = false;
-        UnityEngine.Debug.Log(statManager.Print_String());
-        acc_per.text = statManager.Print_String();
+        acc_per.text = statManager.Print_Accuracy();
         WPM.text = statManager.Print_WPM();
         title_text.text = GetTitle();
         author_text.text = GetAuthor();
     }
+
+
+
+
+
 
     private void PlayerControls()
     {
